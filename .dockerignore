@@ -1,0 +1,24 @@
+# Build output
+target/
+*.jar
+# IDE files
+.idea/
+*.iml
+.vscode/
+.project
+.classpath
+.settings/
+# Git
+.git/
+.gitignore
+# Maven wrapper (not needed - we use Maven image in stage 1)
+.mvn/
+# OS
+.DS_Store
+Thumbs.db
+# Logs
+*.log
+# Docker files themselves
+Dockerfile
+.dockerignore
+docker-compose.yml

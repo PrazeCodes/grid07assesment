@@ -1,0 +1,78 @@
+version: "3.9"
+
+services:
+
+  #POSTGRES
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: assessmentdb
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root@456
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d assessmentdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - assessment_net
+  #REDIS
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - assessment_net
+  # ============== SPRING BOOT APP ==============
+  app:
+    build: .
+    container_name: assessment_app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/assessmentdb
+      DB_USER: root
+      DB_PASS: root@456
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+    networks:
+      - assessment_net
+# ============== VOLUMES ==============
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+
+# ============== NETWORK ==============
+networks:
+  assessment_net:
+    driver: bridge
