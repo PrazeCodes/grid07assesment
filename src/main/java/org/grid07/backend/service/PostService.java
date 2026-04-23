@@ -21,7 +21,7 @@ public class PostService {
     @Autowired
     private ViralityService viralityService;
     @Autowired private NotificationService notificationService;
-    // =============== CREATE POST ===============
+    // create-post
     public Post createPost(CreatePost req) {
         Post p = new Post();
         p.setAuthorId(req.getAuthorId());
@@ -29,7 +29,7 @@ public class PostService {
         p.setContent(req.getContent());
         return postRepository.save(p);
     }
-    // =============== ADD COMMENT ===============
+    // add-comment
     public Comment addComment(Long postId, AddComment req) {
         String authorType = req.getAuthorType().toUpperCase();
 // STEP 1: Vertical cap
@@ -38,19 +38,17 @@ public class PostService {
                     "Comment depth exceeds max of 20");
         }
         if ("BOT".equals(authorType)) {
-// STEP 2: Cooldown check (read-only)
             if (req.getHumanAuthorId() != null &&
                     viralityService.isCooldownActive(
                             req.getAuthorId(), req.getHumanAuthorId())) {
                 throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,
                         "Bot on cooldown for this human (10-min limit)");
             }
-// STEP 3: Horizontal cap (atomic INCR)
             if (!viralityService.checkAndIncrementBotCount(postId)) {
                 throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,
                         "Post hit max of 100 bot replies");
             }
-// STEP 4: Set cooldown
+            //set cooldown
             if (req.getHumanAuthorId() != null) {
                 viralityService.setCooldown(
                         req.getAuthorId(), req.getHumanAuthorId());
@@ -64,7 +62,6 @@ public class PostService {
         } else {
             viralityService.updateViralityScore(postId, "HUMAN_COMMENT");
         }
-// STEP 5: DB write (only if all guardrails pass)
         Comment c = new Comment();
         c.setPostId(postId);
         c.setAuthorId(req.getAuthorId());
@@ -73,7 +70,7 @@ public class PostService {
         c.setDepthLevel(req.getDepthLevel());
         return commentRepository.save(c);
     }
-    // =============== LIKE POST ===============
+    // like
     public void likePost(Long postId, LikePost req) {
         postRepository.findById(postId).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));

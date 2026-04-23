@@ -8,14 +8,14 @@ import java.time.Duration;
 @Service
 public class ViralityService {
     private static final int MAX_BOT_REPLIES = 100;
-    private static final long COOLDOWN_SECONDS = 600; // 10 min
+    private static final long COOLDOWN_SECONDS = 600;
     @Autowired
     private RedisTemplate<String, Long> redisTemplate;
     @Autowired
-    @Qualifier("customStringRedisTemplate")  // <-- match RedisConfig bean name
+    @Qualifier("customStringRedisTemplate")
     private RedisTemplate<String, String> stringTemplate;
 
-    // =============== VIRALITY SCORE ===============
+    // virality score
     public void updateViralityScore(Long postId, String interactionType) {
         String key = "post:" + postId + ":virality_score";
         long points = switch (interactionType) {
@@ -34,10 +34,6 @@ public class ViralityService {
         Long v = redisTemplate.opsForValue().get(key);
         return v == null ? 0L : v;
     }
-    // =============== HORIZONTAL CAP ===============
-// Atomic INCR. Two threads at count=99:
-// Thread A -> 100 (allowed)
-// Thread B -> 101 -> DECR back -> rejected
     public boolean checkAndIncrementBotCount(Long postId) {
         String key = "post:" + postId + ":bot_count";
         Long newCount = redisTemplate.opsForValue().increment(key);
@@ -47,7 +43,6 @@ public class ViralityService {
         }
         return true;
     }
-    // =============== COOLDOWN CAP ===============
     public boolean isCooldownActive(Long botId, Long humanId) {
         String key = "cooldown:bot_" + botId + ":human_" + humanId;
         return Boolean.TRUE.equals(stringTemplate.hasKey(key));

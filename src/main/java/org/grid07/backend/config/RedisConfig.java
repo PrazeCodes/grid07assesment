@@ -9,7 +9,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisConfig {
 
-    // For atomic counters (INCR/DECR)
+    // atomic counter
     @Bean
     public RedisTemplate<String, Long> redisTemplate(RedisConnectionFactory cf) {
         RedisTemplate<String, Long> t = new RedisTemplate<>();
@@ -22,10 +22,9 @@ public class RedisConfig {
         return t;
     }
 
-    // For cooldowns + notification lists
-    @Bean("customStringRedisTemplate")                              // <-- ADD THIS
-    public RedisTemplate<String, String> customStringRedisTemplate(  // <-- RENAME METHOD
-                                                                     RedisConnectionFactory cf) {
+    // cooldowns & notification lists
+    @Bean("customStringRedisTemplate")
+    public RedisTemplate<String, String> customStringRedisTemplate(RedisConnectionFactory cf) {
         RedisTemplate<String, String> t = new RedisTemplate<>();
         t.setConnectionFactory(cf);
         t.setKeySerializer(new StringRedisSerializer());

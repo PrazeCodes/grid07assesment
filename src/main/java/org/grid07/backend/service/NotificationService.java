@@ -17,13 +17,13 @@ public class NotificationService {
         String msg = "Bot " + botName + " replied to your post #" + postId;
         Boolean onCooldown = stringTemplate.hasKey(cooldownKey);
         if (Boolean.FALSE.equals(onCooldown) || onCooldown == null) {
-// NOT on cooldown - push immediate
+            //not on cooldown
             System.out.println("[NOTIFICATION] Push Notification Sent to User "
                     + userId + ": " + msg);
             stringTemplate.opsForValue().set(cooldownKey, "1",
                     Duration.ofSeconds(NOTIF_COOLDOWN_SECONDS));
         } else {
-// ON cooldown - queue for sweeperstringTemplate.opsForList().leftPush(pendingKey, msg);
+            //on cooldown
             System.out.println("[NOTIFICATION] Queued for User "
                     + userId + " (on cooldown)");
         }

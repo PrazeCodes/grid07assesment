@@ -12,10 +12,7 @@ public class NotificationScheduler {
     @Autowired
     @Qualifier("customStringRedisTemplate")
     private RedisTemplate<String, String> stringTemplate;
-    /**
-     * Runs every 5 min. Scans user:*:pending_notifs.
-     * Pops all messages, logs summary, clears list.
-     */
+    
     @Scheduled(fixedRate = 300_000)
     public void sweepPendingNotifications() {
         System.out.println("[SCHEDULER] Starting sweep...");

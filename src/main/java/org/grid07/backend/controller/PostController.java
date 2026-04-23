@@ -17,20 +17,20 @@ import java.util.Map;
 public class PostController {
     @Autowired
     private PostService postService;
-    // POST /api/posts
+
     @PostMapping
     public ResponseEntity<Post> createPost(@RequestBody CreatePost req) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(postService.createPost(req));
     }
-    // POST /api/posts/{postId}/comments
+
     @PostMapping("/{postId}/comments")
     public ResponseEntity<Comment> addComment(
             @PathVariable Long postId,
             @RequestBody AddComment req) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(postService.addComment(postId, req));}
-    // POST /api/posts/{postId}/like
+
     @PostMapping("/{postId}/like")
     public ResponseEntity<Map<String, String>> likePost(
             @PathVariable Long postId,
